@@ -126,6 +126,10 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${themeColors} relative overflow-hidden`}>
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{ backgroundImage: 'url(https://cdn.poehali.dev/projects/ff6c77e7-51e5-4252-b979-4e351c10d85e/files/ab36f841-d6b0-40a0-953e-dcf1b47b7a9f.jpg)' }}
+      />
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {[...Array(50)].map((_, i) => (
