@@ -89,6 +89,7 @@ const Index = () => {
   const [currentGreeting, setCurrentGreeting] = useState('');
   const [showConfetti, setShowConfetti] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(30);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
@@ -136,7 +137,7 @@ const Index = () => {
     if (!audioRef.current) {
       audioRef.current = new Audio(THEME_MUSIC[currentTheme]);
       audioRef.current.loop = true;
-      audioRef.current.volume = 0.3;
+      audioRef.current.volume = volume / 100;
     }
 
     if (isPlaying) {
@@ -145,6 +146,14 @@ const Index = () => {
     } else {
       audioRef.current.play();
       setIsPlaying(true);
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseInt(e.target.value);
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume / 100;
     }
   };
 
@@ -249,6 +258,23 @@ const Index = () => {
               {isPlaying ? 'Остановить' : 'Музыка'}
             </Button>
           </div>
+          
+          {isPlaying && (
+            <div className="mt-6 bg-white/90 backdrop-blur-sm rounded-2xl p-6 max-w-md mx-auto shadow-xl animate-fade-in-up">
+              <div className="flex items-center gap-4">
+                <Icon name="Volume2" size={24} className="text-gray-700" />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+                <span className="text-lg font-semibold text-gray-700 min-w-[3rem]">{volume}%</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mb-8">
