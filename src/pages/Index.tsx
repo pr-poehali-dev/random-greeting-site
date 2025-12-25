@@ -122,6 +122,22 @@ const Index = () => {
     setTimeout(() => setShowConfetti(false), 5000);
   };
 
+  const handleShare = () => {
+    const shareText = `${currentGreeting}\n\nСоздай своё поздравление на`;
+    const shareUrl = window.location.href;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Поздравление',
+        text: shareText,
+        url: shareUrl,
+      }).catch(() => {});
+    } else {
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
   const themeColors = THEME_INFO.find(t => t.id === currentTheme)?.color || 'from-purple-500 to-pink-500';
 
   return (
@@ -174,14 +190,24 @@ const Index = () => {
               {currentGreeting}
             </p>
           </div>
-          <Button
-            onClick={handleRefresh}
-            size="lg"
-            className="mt-8 text-xl px-8 py-6 bg-white text-purple-600 hover:bg-purple-50 shadow-xl transform hover:scale-105 transition-all"
-          >
-            <Icon name="RefreshCw" className="mr-2" size={24} />
-            Новое поздравление
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+            <Button
+              onClick={handleRefresh}
+              size="lg"
+              className="text-xl px-8 py-6 bg-white text-purple-600 hover:bg-purple-50 shadow-xl transform hover:scale-105 transition-all"
+            >
+              <Icon name="RefreshCw" className="mr-2" size={24} />
+              Новое поздравление
+            </Button>
+            <Button
+              onClick={handleShare}
+              size="lg"
+              className="text-xl px-8 py-6 bg-green-500 text-white hover:bg-green-600 shadow-xl transform hover:scale-105 transition-all"
+            >
+              <Icon name="Share2" className="mr-2" size={24} />
+              Поделиться
+            </Button>
+          </div>
         </div>
 
         <div className="mb-8">
