@@ -90,6 +90,7 @@ const Index = () => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(30);
+  const [recipientName, setRecipientName] = useState('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
@@ -165,7 +166,8 @@ const Index = () => {
   };
 
   const handleShare = () => {
-    const shareText = `${currentGreeting}\n\nСоздай своё поздравление на`;
+    const nameText = recipientName ? `${recipientName}, ${currentGreeting.toLowerCase()}` : currentGreeting;
+    const shareText = `${nameText}\n\nСоздай своё поздравление на`;
     const shareUrl = window.location.href;
     
     if (navigator.share) {
@@ -225,8 +227,19 @@ const Index = () => {
       <div className="relative z-10 container mx-auto px-4 py-12">
         <div className="text-center mb-12 animate-fade-in-up">
           <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 drop-shadow-2xl">
-            Поздравляем! 🎉
+            Поздравляем{recipientName && `, ${recipientName}`}! 🎉
           </h1>
+          
+          <div className="mb-6 max-w-md mx-auto">
+            <input
+              type="text"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              placeholder="Введите имя получателя"
+              className="w-full px-6 py-4 text-xl text-center rounded-2xl border-2 border-white/50 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-4 focus:ring-white/50 focus:border-white transition-all shadow-lg"
+            />
+          </div>
+
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 md:p-12 max-w-3xl mx-auto shadow-2xl animate-pulse-glow">
             <p className="text-3xl md:text-5xl font-semibold text-gray-800 leading-relaxed">
               {currentGreeting}
