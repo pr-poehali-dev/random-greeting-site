@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
@@ -66,6 +66,15 @@ const GREETINGS = {
   ],
 };
 
+const THEME_MUSIC = {
+  birthday: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  newyear: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+  march8: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+  wedding: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+  valentines: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+  graduation: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+};
+
 const THEME_INFO = [
   { id: 'birthday', name: 'День Рождения', emoji: '🎂', color: 'from-pink-500 to-purple-500' },
   { id: 'newyear', name: 'Новый Год', emoji: '🎄', color: 'from-blue-500 to-cyan-500' },
@@ -79,6 +88,8 @@ const Index = () => {
   const [currentTheme, setCurrentTheme] = useState<keyof typeof GREETINGS>('birthday');
   const [currentGreeting, setCurrentGreeting] = useState('');
   const [showConfetti, setShowConfetti] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -113,6 +124,28 @@ const Index = () => {
 
   const handleThemeChange = (theme: keyof typeof GREETINGS) => {
     setCurrentTheme(theme);
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = THEME_MUSIC[theme];
+      audioRef.current.play();
+    }
+  };
+
+  const toggleMusic = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(THEME_MUSIC[currentTheme]);
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.3;
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
   };
 
   const handleRefresh = () => {
@@ -206,6 +239,14 @@ const Index = () => {
             >
               <Icon name="Share2" className="mr-2" size={24} />
               Поделиться
+            </Button>
+            <Button
+              onClick={toggleMusic}
+              size="lg"
+              className="text-xl px-8 py-6 bg-blue-500 text-white hover:bg-blue-600 shadow-xl transform hover:scale-105 transition-all"
+            >
+              <Icon name={isPlaying ? "Pause" : "Play"} className="mr-2" size={24} />
+              {isPlaying ? 'Остановить' : 'Музыка'}
             </Button>
           </div>
         </div>
