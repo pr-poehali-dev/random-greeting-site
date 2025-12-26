@@ -94,6 +94,7 @@ const Index = () => {
   const [visitorCount, setVisitorCount] = useState<number>(0);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showCopyNotification, setShowCopyNotification] = useState(false);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
@@ -141,6 +142,25 @@ const Index = () => {
     };
 
     fetchAndIncrementVisitors();
+
+    const notificationAsked = localStorage.getItem('notificationAsked');
+    if (!notificationAsked && 'Notification' in window) {
+      setTimeout(() => setShowNotificationPrompt(true), 3000);
+    }
+
+    const checkAndScheduleNotification = () => {
+      const lastNotificationTime = localStorage.getItem('lastNotificationTime');
+      const now = Date.now();
+      const hours48 = 48 * 60 * 60 * 1000;
+
+      if (Notification.permission === 'granted') {
+        if (!lastNotificationTime || now - parseInt(lastNotificationTime) >= hours48) {
+          scheduleNextNotification();
+        }
+      }
+    };
+
+    checkAndScheduleNotification();
   }, []);
 
   const handleThemeChange = (theme: keyof typeof GREETINGS) => {
@@ -207,6 +227,33 @@ const Index = () => {
     }
     
     setShowShareMenu(false);
+  };
+
+  const scheduleNextNotification = () => {
+    const newYearGreetings = GREETINGS.newYear;
+    const randomGreeting = newYearGreetings[Math.floor(Math.random() * newYearGreetings.length)];
+    
+    if (Notification.permission === 'granted') {
+      new Notification('🎄 Новогоднее поздравление!', {
+        body: randomGreeting,
+        icon: 'https://cdn.poehali.dev/projects/ff6c77e7-51e5-4252-b979-4e351c10d85e/files/ab36f841-d6b0-40a0-953e-dcf1b47b7a9f.jpg',
+        badge: 'https://cdn.poehali.dev/projects/ff6c77e7-51e5-4252-b979-4e351c10d85e/files/ab36f841-d6b0-40a0-953e-dcf1b47b7a9f.jpg',
+      });
+      
+      localStorage.setItem('lastNotificationTime', Date.now().toString());
+    }
+  };
+
+  const handleNotificationRequest = async (allow: boolean) => {
+    localStorage.setItem('notificationAsked', 'true');
+    setShowNotificationPrompt(false);
+
+    if (allow && 'Notification' in window) {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        scheduleNextNotification();
+      }
+    }
   };
 
   const themeColors = THEME_INFO.find(t => t.id === currentTheme)?.color || 'from-purple-500 to-pink-500';
@@ -415,6 +462,36 @@ const Index = () => {
       {showCopyNotification && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-8 py-4 rounded-2xl shadow-2xl z-50 animate-fade-in-up text-xl font-semibold">
           ✓ Скопировано!
+        </div>
+      )}
+
+      {showNotificationPrompt && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in-up">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4">🔔</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                Новогодние поздравления
+              </h3>
+              <p className="text-gray-600 text-lg">
+                Разрешите уведомления, чтобы получать праздничные поздравления каждые 48 часов! 🎄✨
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => handleNotificationRequest(false)}
+                className="flex-1 bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Не сейчас
+              </Button>
+              <Button
+                onClick={() => handleNotificationRequest(true)}
+                className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600"
+              >
+                Разрешить 🎉
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
