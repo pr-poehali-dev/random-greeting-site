@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get visitor count",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Increment visitor count",
+      "method": "POST",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}

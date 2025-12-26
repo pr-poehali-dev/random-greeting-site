@@ -91,6 +91,7 @@ const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(30);
   const [recipientName, setRecipientName] = useState('');
+  const [visitorCount, setVisitorCount] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
@@ -123,6 +124,22 @@ const Index = () => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
     return () => clearTimeout(timer);
   }, [currentTheme]);
+
+  useEffect(() => {
+    const fetchAndIncrementVisitors = async () => {
+      try {
+        const response = await fetch('https://functions.poehali.dev/127fb113-b7e1-4faa-8cbd-8ca702c0ef2e', {
+          method: 'POST',
+        });
+        const data = await response.json();
+        setVisitorCount(data.total_visitors);
+      } catch (error) {
+        console.error('Error tracking visitor:', error);
+      }
+    };
+
+    fetchAndIncrementVisitors();
+  }, []);
 
   const handleThemeChange = (theme: keyof typeof GREETINGS) => {
     setCurrentTheme(theme);
@@ -186,6 +203,15 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${themeColors} relative overflow-hidden`}>
+      <div className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-xl">
+        <div className="flex items-center gap-2">
+          <Icon name="Users" size={20} className="text-purple-600" />
+          <span className="text-lg font-semibold text-gray-800">
+            {visitorCount.toLocaleString('ru-RU')}
+          </span>
+        </div>
+      </div>
+      
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-20"
         style={{ backgroundImage: 'url(https://cdn.poehali.dev/projects/ff6c77e7-51e5-4252-b979-4e351c10d85e/files/ab36f841-d6b0-40a0-953e-dcf1b47b7a9f.jpg)' }}
