@@ -93,6 +93,7 @@ const Index = () => {
   const [recipientName, setRecipientName] = useState('');
   const [visitorCount, setVisitorCount] = useState<number>(0);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showCopyNotification, setShowCopyNotification] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
@@ -201,6 +202,8 @@ const Index = () => {
       window.open(telegramUrl, '_blank');
     } else if (messenger === 'copy') {
       navigator.clipboard.writeText(fullText);
+      setShowCopyNotification(true);
+      setTimeout(() => setShowCopyNotification(false), 2000);
     }
     
     setShowShareMenu(false);
@@ -408,6 +411,12 @@ const Index = () => {
           Обновите страницу для нового поздравления! 🎊
         </p>
       </div>
+
+      {showCopyNotification && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-8 py-4 rounded-2xl shadow-2xl z-50 animate-fade-in-up text-xl font-semibold">
+          ✓ Скопировано!
+        </div>
+      )}
     </div>
   );
 };
