@@ -92,6 +92,7 @@ const Index = () => {
   const [volume, setVolume] = useState(30);
   const [recipientName, setRecipientName] = useState('');
   const [visitorCount, setVisitorCount] = useState<number>(0);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const playSound = () => {
@@ -183,20 +184,26 @@ const Index = () => {
   };
 
   const handleShare = () => {
+    setShowShareMenu(!showShareMenu);
+  };
+
+  const shareToMessenger = (messenger: 'whatsapp' | 'telegram' | 'copy') => {
     const nameText = recipientName ? `${recipientName}, ${currentGreeting.toLowerCase()}` : currentGreeting;
     const shareText = `${nameText}\n\nСоздай своё поздравление на`;
     const shareUrl = window.location.href;
+    const fullText = `${shareText} ${shareUrl}`;
     
-    if (navigator.share) {
-      navigator.share({
-        title: 'Поздравление',
-        text: shareText,
-        url: shareUrl,
-      }).catch(() => {});
-    } else {
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+    if (messenger === 'whatsapp') {
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`;
       window.open(whatsappUrl, '_blank');
+    } else if (messenger === 'telegram') {
+      const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+      window.open(telegramUrl, '_blank');
+    } else if (messenger === 'copy') {
+      navigator.clipboard.writeText(fullText);
     }
+    
+    setShowShareMenu(false);
   };
 
   const themeColors = THEME_INFO.find(t => t.id === currentTheme)?.color || 'from-purple-500 to-pink-500';
@@ -280,14 +287,44 @@ const Index = () => {
               <Icon name="RefreshCw" className="mr-2" size={24} />
               Новое поздравление
             </Button>
-            <Button
-              onClick={handleShare}
-              size="lg"
-              className="text-xl px-8 py-6 bg-green-500 text-white hover:bg-green-600 shadow-xl transform hover:scale-105 transition-all"
-            >
-              <Icon name="Share2" className="mr-2" size={24} />
-              Поделиться
-            </Button>
+            <div className="relative">
+              <Button
+                onClick={handleShare}
+                size="lg"
+                className="text-xl px-8 py-6 bg-green-500 text-white hover:bg-green-600 shadow-xl transform hover:scale-105 transition-all"
+              >
+                <Icon name="Share2" className="mr-2" size={24} />
+                Поделиться
+              </Button>
+              
+              {showShareMenu && (
+                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl shadow-2xl p-4 min-w-[250px] z-30 animate-fade-in-up">
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={() => shareToMessenger('whatsapp')}
+                      className="w-full justify-start bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      <Icon name="MessageCircle" className="mr-2" size={20} />
+                      WhatsApp
+                    </Button>
+                    <Button
+                      onClick={() => shareToMessenger('telegram')}
+                      className="w-full justify-start bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      <Icon name="Send" className="mr-2" size={20} />
+                      Telegram
+                    </Button>
+                    <Button
+                      onClick={() => shareToMessenger('copy')}
+                      className="w-full justify-start bg-gray-700 hover:bg-gray-800 text-white"
+                    >
+                      <Icon name="Copy" className="mr-2" size={20} />
+                      Скопировать
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
             <Button
               onClick={toggleMusic}
               size="lg"
